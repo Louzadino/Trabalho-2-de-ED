@@ -13,12 +13,6 @@ struct HashTable
     CmpFunction cmp_fn;
 };
 
-struct HashTableItem
-{
-    void *key;
-    void *val;
-};
-
 struct HashTableIterator
 {
     HashTable *h;
@@ -59,14 +53,14 @@ void *hash_table_set(HashTable *h, void *key, void *val)
 
     while (n)
     {
-        HashTableItem *item = node_get_value(n);
+        HashTableItem *item = n->value;
         if (h->cmp_fn(item->key, key) == 0)
         {
             void *old_val = item->val;
             item->val = val;
             return old_val;
         }
-        n = node_get_next(n);
+        n = n->next;
     }
 
     // Se a chave nao existir, insere um novo item na lista
@@ -91,10 +85,10 @@ void *hash_table_get(HashTable *h, void *key)
 
     while (n)
     {
-        HashTableItem *item = node_get_value(n);
+        HashTableItem *item = n->value;
         if (h->cmp_fn(item->key, key) == 0)
             return item->val;
-        n = node_get_next(n);
+        n = n->next;
     }
 
     return NULL;
@@ -110,16 +104,16 @@ void *hash_table_pop(HashTable *h, void *key)
 
     while (n)
     {
-        HashTableItem *item = node_get_value(n);
+        HashTableItem *item = n->value;
         if (h->cmp_fn(item->key, key) == 0)
         {
             void *val = item->val;
             if (prev)
-                node_set_next(prev, node_get_next(n));
+                prev->next = n->next;
             else
-                list_set_head(l, node_get_next(n));
+                list_set_head(l, n->next);
 
-            if (n == list_get_last(l))
+            if (n == list_get_head(l))
                 list_set_last(l, prev);
 
             free(item->key);
@@ -132,7 +126,7 @@ void *hash_table_pop(HashTable *h, void *key)
         }
 
         prev = n;
-        n = node_get_next(n);
+        n = n->next;
     }
 
     return NULL;
@@ -154,11 +148,11 @@ void hash_table_destroy(HashTable *h)
 
         while(n)
         {
-            HashTableItem *item = node_get_value(n);
+            HashTableItem *item = n->value;
             free(item->key);
             free(item->val);
             free(item);
-            n = node_get_next(n);
+            n = n->next;
         }
 
         list_destroy(l);
@@ -194,13 +188,11 @@ HashTableItem *hash_table_iterator_next(HashTableIterator *it)
         it->bucket_idx++;
         if (it->bucket_idx >= it->h->table_size)
             return NULL;
-        
-        
         it->node = list_get_head(it->h->buckets[it->bucket_idx]);
     }
 
-    HashTableItem *item = node_get_value(it->node);
-    it->node = node_get_next(it->node);
+    HashTableItem *item = it->node->value;
+    it->node = it->node->next;
     it->current_elem++;
 
     return item;

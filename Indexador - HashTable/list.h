@@ -7,7 +7,9 @@
 typedef unsigned int bool;
 
 typedef struct List List;
+
 typedef struct ListIterator ListIterator;
+
 
 /**
  * @brief Construct a new double linked list object
@@ -220,10 +222,10 @@ bool list_iterator_is_over(ListIterator *it);
  */
 void list_iterator_destroy(ListIterator *it);
 
-Node* list_get_head(List *l);
-Node* list_get_last(List *l);
-
+Node *list_get_head(List *l);
 void list_set_head(List *l, Node *n);
+
+Node *list_get_last(List *l);
 void list_set_last(List *l, Node *n);
 
 #endif

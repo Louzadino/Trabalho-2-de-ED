@@ -45,7 +45,7 @@ void list_push_front(List *l, data_type data)
             l->head = l->last = new_node;
         else 
         {
-            node_set_prev(l->head, new_node);
+            l->head->prev = new_node;
             l->head = new_node;
         }
         l->size++;
@@ -62,7 +62,7 @@ void list_push_back(List *l, data_type data)
             l->head = l->last = new_node;
         else
         {
-            node_set_next(l->last, new_node);
+            l->last->next = new_node;
             l->last = new_node;
         }
         l->size++;
@@ -76,8 +76,8 @@ void list_print(List *l, void (*print_fn)(data_type))
     printf("[");
     for (int i = 0; i < list_size(l); i++)
     {
-        print_fn(node_get_value(current));
-        current = node_get_next(current);  // Avança para o próximo nó
+        print_fn(current->value);
+        current = current->next;  // Avança para o próximo nó
         if (i < list_size(l) - 1) printf(", ");
     }
     printf("]");
@@ -90,9 +90,9 @@ void list_print_reverse(List *l, void (*print_fn)(data_type))
     printf("[");
     while(current != NULL)
     {
-        print_fn(node_get_value(current));
-        if (node_get_prev(current) != NULL) printf(", ");
-        current = node_get_prev(current);  // Avança para o nó anterior
+        print_fn(current->value);
+        if (current->prev != NULL) printf(", ");
+        current = current->prev;  // Avança para o nó anterior
     }
     printf("]");
 }
@@ -105,9 +105,9 @@ data_type list_get(List *l, int i)
 
     Node* node = l->head;
     for (int j = 0; j < i; j++)
-        node = node_get_next(node);
+        node = node->next;
 
-    return node_get_value(node);
+    return node->value;
 }
 
 data_type list_pop_front(List *l)
@@ -116,16 +116,13 @@ data_type list_pop_front(List *l)
     if (l->head == NULL) exit(printf("ERRO: lista nula\n"));
 
     Node* node_to_pop = l->head;
-    l->head = node_get_next(l->head);
-    data_type value = node_get_value(node_to_pop);
+    l->head = l->head->next;
+    data_type value = node_to_pop->value;
     node_destroy(node_to_pop);
     l->size--;
 
     if (l->head != NULL)
-    {
-        Node* prev = node_get_prev(l->head);
-        prev = NULL;
-    }
+        l->head->prev = NULL;
     else
         l->last = l->head;
 
@@ -137,16 +134,13 @@ data_type list_pop_back(List *l)
     if (l->head == NULL) exit(printf("ERRO: lista nula\n"));
 
     Node* node_to_pop = l->last;
-    l->last = node_get_prev(l->last);
-    data_type value = node_get_value(node_to_pop);
+    l->last = l->last->prev;
+    data_type value = node_to_pop->value;
     node_destroy(node_to_pop);
     l->size--;
 
     if (l->last != NULL)
-    {
-        Node* next = node_get_next(l->last);
-        next = NULL;
-    }
+        l->last->next = NULL;
     else
         l->head = l->last;
 
@@ -161,7 +155,7 @@ Node* list_search_prev(List *l, int index){
     for (int count = 0; count < index; count++)
     {
         prev = curr;
-        curr = node_get_next(curr);
+        curr = curr->next;
     }
 
     return prev;
@@ -170,7 +164,11 @@ Node* list_search_prev(List *l, int index){
 data_type list_pop_index(List *l, int index)
 {
 
-    if (index < 0 || index >= list_size(l)) printf("INVALID INDEX\n");
+    if (index < 0 || index >= list_size(l)) 
+    {
+        printf("INVALID INDEX\n");
+        //return NULL;
+    }
 
     Node* to_remove = l->head;
     Node* prev = list_search_prev(l, index);
@@ -178,15 +176,15 @@ data_type list_pop_index(List *l, int index)
     if (prev == NULL)
     {
         to_remove = l->head;
-        l->head = node_get_next(l->head);
+        l->head = l->head->next;
     }
     else
     {
-        to_remove = node_get_next(prev);
-        node_set_next(prev, node_get_next(to_remove));
+        to_remove = prev->next;
+        prev->next = to_remove->next;
     }
 
-    data_type value = node_get_value(to_remove);
+    data_type value = to_remove->value;
     node_destroy(to_remove);
     l->size--;
 
@@ -200,8 +198,8 @@ List *list_reverse(List *l)
 
     while (curr != NULL)
     {
-        list_push_front(rev_l, node_get_value(curr));
-        curr = node_get_next(curr);
+        list_push_front(rev_l, curr->value);
+        curr = curr->next;
     }
 
     return rev_l;
@@ -227,15 +225,12 @@ void list_remove(List *l, data_type val)
 
     while (curr != NULL)
     {
-        if (node_get_value(curr) == val)
+        if (curr->value == val)
         {
             if (prev == NULL)
-                l->head = new_n = node_get_next(curr);
+                l->head = new_n = curr->next;
             else
-            {
-                node_set_next(prev, node_get_next(curr));
-                new_n = node_get_next(curr);
-            }
+                prev->next = new_n = curr->next;
 
             node_destroy(curr);
             curr = new_n;
@@ -244,7 +239,7 @@ void list_remove(List *l, data_type val)
         else
         {
             prev = curr;
-            curr = node_get_next(curr);
+            curr = curr->next;
         }
     }
 }
@@ -255,8 +250,8 @@ void list_cat(List *l, List *m){
 
     while (curr != NULL)
     {
-        list_push_front(l, node_get_value(curr));   
-        curr = node_get_next(curr);
+        list_push_front(l, curr->value);   
+        curr = curr->next;
     }
 }
 
@@ -268,7 +263,7 @@ void list_destroy(List *l)
         while (l->head != NULL)
         {
         Node* node_to_destroy = l->head;
-        l->head = node_get_next(l->head);
+        l->head = l->head->next;
         node_destroy(node_to_destroy);
         }
 
@@ -287,22 +282,20 @@ void list_sort(List *l)
     {
         swaped = 0;
         curr = l->head;
-        next = node_get_next(curr);
+        next = curr->next;
 
         while (next != NULL)
         {
-            data_type curr_val = node_get_value(curr);
-            data_type next_val = node_get_value(next);
-            if (curr_val > next_val)
+            if (curr->value > next->value)
             {
-                temp = curr_val;
-                curr_val = next_val;
-                next_val = temp;
+                temp = curr->value;
+                curr->value = next->value;
+                next->value = temp;
                 swaped = 1;
             }
 
             curr = next;
-            next = node_get_next(next);
+            next = next->next;
         }
     }
 }
@@ -333,8 +326,8 @@ data_type *list_iterator_next(ListIterator *it)
 {
     if (it->current == NULL) return NULL;
 
-    data_type *value = node_get_value(it->current);
-    it->current = node_get_next(it->current);
+    data_type *value = &(it->current->value);
+    it->current = it->current->next;
 
     return value;
 }
@@ -343,8 +336,8 @@ data_type *list_iterator_previous(ListIterator *it)
 {
     if (it->current == NULL) return NULL;
 
-    data_type *value = node_get_value(it->current);
-    it->current = node_get_prev(it->current);
+    data_type *value = &(it->current->value);
+    it->current = it->current->prev;
 
     return value;
 }
@@ -359,19 +352,19 @@ void list_iterator_destroy(ListIterator *it)
     free(it);
 }
 
-Node* list_get_head(List *l)
+Node *list_get_head(List *l)
 {
     return l->head;
-}
-
-Node* list_get_last(List *l)
-{
-    return l->last;
 }
 
 void list_set_head(List *l, Node *n)
 {
     l->head = n;
+}
+
+Node *list_get_last(List *l)
+{
+    return l->last;
 }
 
 void list_set_last(List *l, Node *n)

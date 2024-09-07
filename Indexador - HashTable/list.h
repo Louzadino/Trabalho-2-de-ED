@@ -6,17 +6,8 @@
 
 typedef unsigned int bool;
 
-typedef struct
-{
-    Node *head;
-    Node *last;
-    int size;
-} List;
-
-typedef struct
-{
-    Node *current;
-} ListIterator;
+typedef struct List List;
+typedef struct ListIterator ListIterator;
 
 /**
  * @brief Construct a new double linked list object
@@ -228,5 +219,11 @@ bool list_iterator_is_over(ListIterator *it);
  * Pointer to the iterator.
  */
 void list_iterator_destroy(ListIterator *it);
+
+Node* list_get_head(List *l);
+Node* list_get_last(List *l);
+
+void list_set_head(List *l, Node *n);
+void list_set_last(List *l, Node *n);
 
 #endif

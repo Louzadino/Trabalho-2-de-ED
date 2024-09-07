@@ -7,11 +7,7 @@ typedef struct HashTable HashTable;
 typedef int (*HashFunction)(HashTable *, void *);
 typedef int (*CmpFunction)(void *k1, void *k2);
 
-typedef struct
-{
-    void *key;
-    void *val;
-} HashTableItem;
+typedef struct HashTableItem HashTableItem;
 
 typedef struct HashTableIterator HashTableIterator;
 

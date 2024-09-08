@@ -20,14 +20,16 @@ WordIndexer *word_indexer_construct(int table_size, HashFunction hash_fn, CmpFun
     return indexer;
 }
 
-void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
+void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name) 
 {
-    List* df_list = (List *) hash_table_get(indexer->table, word); // Recupera a lista de DocumentFrequency da palavra
+
+    List *df_list = (List *) hash_table_get(indexer->table, word); // Recupera a lista de DocumentFrequency da palavra
 
     // Se a palavra não foi encontrada na tabela, cria uma nova lista
     if (df_list == NULL) {
         df_list = list_construct();
         hash_table_set(indexer->table, word, df_list);
+        printf("Criou nova lista para %s\n", word);
     }
 
     // Verifica se o documento já existe na lista de frequências
@@ -38,17 +40,21 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
         Document *doc = doc_freq_get_doc(current_df);
         char* current_doc_name = doc_get_name(doc);
 
-        if (strcmp(current_doc_name, doc_name) == 0) {
-            doc_freq_increment(current_df); // Incrementa a frequência se já existir
-            return;
+        if (!(strcmp(current_doc_name, doc_name))) {
+            doc_freq_increment(current_df);
+            printf("Incrementou %s para %d em %s\n", word, doc_freq_get_frequency(current_df), doc_name);
+            //free(word); // Libera a palavra
+            return; // Saí da função se a frequência foi incrementada
         }
         n = n->next;
     }
 
     // Se o documento não foi encontrado, cria um novo DocumentFrequency
-    DocumentFrequency *new_df = doc_freq_construct(doc_name);
-    list_push_front(df_list, new_df);
+    DocumentFrequency *new_df = doc_freq_construct(doc_name); 
+    list_push_front(df_list, new_df); // Certifique-se de que list_push_front não libere o novo_df
+    printf("Adicionou %s em %s\n", word, doc_name);
 }
+
 
 void word_indexer_print(WordIndexer *indexer) 
 {
@@ -56,6 +62,12 @@ void word_indexer_print(WordIndexer *indexer)
     
     while (!hash_table_iterator_is_over(it)) {
         HashTableItem *item = hash_table_iterator_next(it);
+        
+        // Verifica se o item não é nulo
+        if (item == NULL || item->key == NULL || item->val == NULL) {
+            continue; // Pula o item se for inválido
+        }
+
         char *word = (char *) item->key;
         List *doc_list = (List *) item->val;
         
@@ -65,38 +77,46 @@ void word_indexer_print(WordIndexer *indexer)
         while (n != NULL) {
             DocumentFrequency *df = (DocumentFrequency *)n->value;
             Document *doc = doc_freq_get_doc(df);
-            printf("%s %d ", doc_get_name(doc), doc_freq_get_frequency(df));
+            
+            // Verifica se o documento é válido antes de imprimir
+            if (doc != NULL && doc_get_name(doc) != NULL) {
+                printf("%s %d ", doc_get_name(doc), doc_freq_get_frequency(df));
+            }
+
             n = n->next;
         }
         printf("\n");
     }
     
+    // Libera o iterador
     hash_table_iterator_destroy(it);
+}
+
+HashTable* word_indexer_get_table(WordIndexer *indexer) 
+{
+    return indexer->table;
 }
 
 void word_indexer_destroy(WordIndexer *indexer) 
 {
     HashTableIterator *it = hash_table_iterator(indexer->table);
-
+    
     while (!hash_table_iterator_is_over(it)) {
-        HashTableItem *item = hash_table_iterator_next(it);
-        List *df_list = (List *) item->val;
+        char *word = (char *)hash_table_iterator_next(it);
+        List *doc_list = hash_table_get(indexer->table, word);
 
-        // Destruir cada DocumentFrequency na lista
-        Node *n = list_get_head(df_list);
+        // Destrói a lista de DocumentFrequency
+        Node *n = list_get_head(doc_list);
         while (n != NULL) {
             DocumentFrequency *df = (DocumentFrequency *)n->value;
-            doc_freq_destroy(df);
+            doc_freq_destroy(df); // Certifique-se de que isso está correto
             n = n->next;
         }
-
-        // Destruir a lista de DocumentFrequency
-        list_destroy(df_list);
+        list_destroy(doc_list); // Libere a lista
     }
-
-    hash_table_iterator_destroy(it);
     
-    // Destruir a tabela hash e o indexador
-    hash_table_destroy(indexer->table);
-    free(indexer);
+    hash_table_iterator_destroy(it);
+    hash_table_destroy(indexer->table); // Libere a tabela hash
+    free(indexer); // Libere o indexador
 }
+

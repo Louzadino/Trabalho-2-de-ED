@@ -16,6 +16,8 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name);
 
 void word_indexer_print(WordIndexer *indexer);
 
+HashTable* word_indexer_get_table(WordIndexer *indexer);
+
 void word_indexer_destroy(WordIndexer *indexer);
 
 #endif

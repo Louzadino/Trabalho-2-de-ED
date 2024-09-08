@@ -1,9 +1,13 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "hash.h"
+#include "list.h"
+#include "document_frequency.h"
+#include "document.h"
 #include "vector.h"
+#include "WordIndexer.h"
+
 
 int hash_str(HashTable *h, void *data)
 {
@@ -28,46 +32,59 @@ int cmp_string(const void *a, const void *b)
     return cmp_str(((HashTableItem *)a)->key, ((HashTableItem *)b)->key);
 }
 
-int main()
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_DOC_NAME 100
+
+int main() 
 {
-    HashTable *h = hash_table_construct(11, hash_str, cmp_str);
+    // Tamanho da tabela hash
+    int table_size = 11;
 
-    int n;
-    
-    scanf("%d", &n); // Numero de palavras no texto
+    // Criação do indexador de palavras
+    WordIndexer *indexer = word_indexer_construct(table_size, hash_str, cmp_str);
 
-    // Contador de frequencia de palavras no texto
+    // Lê o número de documentos
+    int num_docs;
+    scanf("%d", &num_docs);
+    getchar(); // Para consumir o \n
 
-    for(int i = 0; i < n; i++) {
-        char *name = malloc(sizeof(char) * 100);
-        scanf("%s", name);
-        void *prev = hash_table_get(h, name);
-        
-        if (prev == NULL) {
-            // Inserir nova palavra
-            int *freq = malloc(sizeof(int));
-            *freq = 1;
-            hash_table_set(h, name, freq);
-        } else {
-            // Palavra já existe, atualizar frequência
-            int *count = (int *) prev;
-            (*count)++;
-            free(name); // Liberar, já que não será usada
+    // Processa cada documento
+    for (int i = 0; i < num_docs; i++) 
+    {
+        // Lê o nome do documento
+        getchar(); // Consome '\n'
+        char doc_name[MAX_DOC_NAME];
+        scanf("%[^:]", doc_name);
+        getchar(); // Consome ':'
+
+        // Lê o número de palavras
+        int num_words;
+        scanf("%d", &num_words); // Lê e ignora o número de palavras
+        getchar(); // Consome ':'
+
+        char *content = (char *)malloc(1000 * sizeof(char));
+        scanf("%[^\n]", content);
+
+        // Processamento do conteúdo
+        char *word = strtok(content, " ");
+        while (word != NULL) 
+        {
+            // Insere a palavra no indexador
+            word_indexer_add_word(indexer, word, doc_name);
+
+            // Próxima palavra
+            word = strtok(NULL, " ");
         }
     }
 
+    // Exibe o indexador de palavras no formato esperado
+    word_indexer_print(indexer);
 
-    Vector *v = hash_to_vector(h);
-    vector_sort(v, cmp_string);
-
-    int size = vector_size(v);
-    for(int i = 0; i < size; i++) {
-        void *pair = vector_pop_front(v);
-        printf("%s %d\n", (char *)((HashTableItem *)pair)->key, *(int *)((HashTableItem *)pair)->val);
-    }
-
-    vector_destroy(v);
-    hash_table_destroy(h);
+    // Libera a memória alocada
+    //word_indexer_destroy(indexer);
 
     return 0;
 }

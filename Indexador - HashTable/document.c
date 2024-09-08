@@ -10,7 +10,7 @@ struct Document
     char *doc_content; // Conteudo do documento (texto)
 };
 
-Document *doc_create(char *doc_name)
+Document *doc_construct(char *doc_name)
 {
     Document *doc = (Document *)malloc(sizeof(Document));
 
@@ -50,6 +50,11 @@ void doc_set_content(Document *doc, char *doc_content)
         exit(printf("ERRO: Falha ao alocar memória para o conteúdo do documento\n"));
 
     strcpy(doc->doc_content, doc_content);
+}
+
+int doc_cmp(Document *a, Document *b)
+{
+    return strcmp(a->doc_name, b->doc_name);
 }
 
 void doc_destroy(Document *doc)

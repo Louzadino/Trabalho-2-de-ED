@@ -9,14 +9,14 @@ struct DocumentFrequency {
     int frequency;   // Frequência da palavra no documento
 };
 
-DocumentFrequency *doc_freq_create(char *doc_name)
+DocumentFrequency *doc_freq_construct(char *doc_name)
 {
     DocumentFrequency *df = (DocumentFrequency *)malloc(sizeof(DocumentFrequency));
 
     if (df == NULL) 
         exit(printf("ERRO: Falha ao alocar memória para DocumentFrequency\n"));
 
-    df->doc = doc_create(doc_name); // Cria um novo documento associado
+    df->doc = doc_construct(doc_name); // Cria um novo documento associado
     df->frequency = 1;              // Inicialmente, a palavra aparece uma vez no documento
 
     return df;
@@ -35,6 +35,11 @@ int doc_freq_get_frequency(DocumentFrequency *df)
 void doc_freq_increment(DocumentFrequency *df)
 {
     df->frequency++;
+}
+
+int cmp_doc_freq(DocumentFrequency* a, DocumentFrequency* b)
+{
+    return doc_cmp(a->doc, b->doc);
 }
 
 void doc_freq_destroy(DocumentFrequency *df)

@@ -3,25 +3,44 @@
 #include <stdlib.h>
 #include <string.h>
 
-// A estrutura eh um par de documento e a frequencia da palavra no documento
+// A estrutura é um par de documento e a frequência da palavra no documento
 struct DocumentFrequency {
-    char doc_name[MAX_DOC_NAME];
-    int frequency;
+    Document* doc;   // Ponteiro para o documento
+    int frequency;   // Frequência da palavra no documento
 };
 
 DocumentFrequency *doc_freq_create(char *doc_name)
 {
     DocumentFrequency *df = (DocumentFrequency *)malloc(sizeof(DocumentFrequency));
 
-    if (df == NULL) exit(printf("ERRO: Falha ao alocar memoria para DocumentFrequency\n"));
+    if (df == NULL) 
+        exit(printf("ERRO: Falha ao alocar memória para DocumentFrequency\n"));
 
-    strcpy(df->doc_name, doc_name);
-    df->frequency = 1; // Inicialialmente, a palavra aparece uma vez no documento
+    df->doc = doc_create(doc_name); // Cria um novo documento associado
+    df->frequency = 1;              // Inicialmente, a palavra aparece uma vez no documento
 
     return df;
 }
 
+Document* doc_freq_get_doc(DocumentFrequency *df)
+{
+    return df->doc;
+}
+
+int doc_freq_get_frequency(DocumentFrequency *df)
+{
+    return df->frequency;
+}
+
+void doc_freq_increment(DocumentFrequency *df)
+{
+    df->frequency++;
+}
+
 void doc_freq_destroy(DocumentFrequency *df)
 {
-    free(df);
+    if (df->doc != NULL) 
+        doc_destroy(df->doc);  // Libera o documento associado
+
+    free(df); // Libera a estrutura DocumentFrequency
 }

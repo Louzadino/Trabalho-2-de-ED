@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// A estrutura eh um par de nome do documento e a frequencia da palavra no documento
+// A estrutura eh um par de documento e a frequencia da palavra no documento
 struct DocumentFrequency {
     char doc_name[MAX_DOC_NAME];
     int frequency;

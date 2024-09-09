@@ -8,6 +8,8 @@
 #include "vector.h"
 #include "WordIndexer.h"
 
+#define MAX_DIRECTORY 1000
+
 
 int hash_str(HashTable *h, void *data)
 {
@@ -38,8 +40,21 @@ int cmp_string(const void *a, const void *b)
 
 #define MAX_DOC_NAME 100
 
-int main() 
+int main(int argc, char *argv[]) 
 {
+
+    // Verifica se o diretorio para a pasta de impressões foi informado
+
+    if (argc <= 1) 
+        exit(printf("ERRO: o diretorio para a pasta de impressões nao foi informado\n"));
+
+    char dir[MAX_DIRECTORY];
+    sprintf(dir, "%s", argv[1]);
+    FILE *file = fopen(dir, "r");
+
+    if (file == NULL) 
+        exit(printf("ERRO: nao foi possivel abrir o arquivo\n"));
+
     // Tamanho da tabela hash
     int table_size = 11;
 
@@ -47,44 +62,41 @@ int main()
     WordIndexer *indexer = word_indexer_construct(table_size, hash_str, cmp_str);
 
     // Lê o número de documentos
-    int num_docs;
-    scanf("%d", &num_docs);
-    getchar(); // Para consumir o \n
+    int qtd_docs;
+    fscanf(file, "%d", &qtd_docs);
+    printf("Quantidade de documentos: %d\n", qtd_docs);
 
     // Processa cada documento
-    for (int i = 0; i < num_docs; i++) 
+    for (int i = 0; i < qtd_docs; i++) 
     {
-        // Lê o nome do documento
-        getchar(); // Consome '\n'
+
+        // Processa cada documento
         char doc_name[MAX_DOC_NAME];
-        scanf("%[^:]", doc_name);
-        getchar(); // Consome ':'
+        int qtd_words;
 
-        // Lê o número de palavras
-        int num_words;
-        scanf("%d", &num_words); // Lê e ignora o número de palavras
-        getchar(); // Consome ':'
-
-        char *content = (char *)malloc(1000 * sizeof(char));
-        scanf("%[^\n]", content);
-
-        // Processamento do conteúdo
-        char *word = strtok(content, " ");
-        while (word != NULL) 
+        for (int j = 0; j < qtd_docs; j++) 
         {
-            // Insere a palavra no indexador
-            word_indexer_add_word(indexer, word, doc_name);
+            fscanf(file, "%[^:]: %d: ", doc_name, &qtd_words);
+            printf("Documento atual: %s\n", doc_name);
+            printf("Qtd de palavras: %d\n", qtd_words);
 
-            // Próxima palavra
-            word = strtok(NULL, " ");
+            // Processa cada palavra do documento
+            for (int k = 0; k < qtd_words; k++)
+            {
+                char word[100];
+                fscanf(file, "%s", word); 
+                printf("%s\n", word);
+                //word_indexer_add_word(indexer, word, doc_name);
+            }
         }
     }
 
     // Exibe o indexador de palavras no formato esperado
-    word_indexer_print(indexer);
+    //word_indexer_print(indexer);
 
     // Libera a memória alocada
     //word_indexer_destroy(indexer);
+    fclose(file);
 
     return 0;
 }

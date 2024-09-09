@@ -5,7 +5,7 @@
 
 // A estrutura é um par de documento e a frequência da palavra no documento
 struct DocumentFrequency {
-    Document* doc;   // Ponteiro para o documento
+    char doc_name[MAX_DOC_NAME];   // Ponteiro para o documento
     int frequency;   // Frequência da palavra no documento
 };
 
@@ -16,15 +16,15 @@ DocumentFrequency *doc_freq_construct(char *doc_name)
     if (df == NULL) 
         exit(printf("ERRO: Falha ao alocar memória para DocumentFrequency\n"));
 
-    df->doc = doc_construct(doc_name); // Cria um novo documento associado
+    strcpy(df->doc_name, doc_name);      // Copia o nome do documento
     df->frequency = 1;              // Inicialmente, a palavra aparece uma vez no documento
 
     return df;
 }
 
-Document* doc_freq_get_doc(DocumentFrequency *df)
+char* doc_freq_get_name(DocumentFrequency *df)
 {
-    return df->doc;
+    return df->doc_name;
 }
 
 int doc_freq_get_frequency(DocumentFrequency *df)
@@ -39,13 +39,11 @@ void doc_freq_increment(DocumentFrequency *df)
 
 int cmp_doc_freq(DocumentFrequency* a, DocumentFrequency* b)
 {
-    return doc_cmp(a->doc, b->doc);
+    return strcmp(a->doc_name, b->doc_name);
 }
 
 void doc_freq_destroy(DocumentFrequency *df)
 {
-    if (df->doc != NULL) 
-        doc_destroy(df->doc);  // Libera o documento associado
-
-    free(df); // Libera a estrutura DocumentFrequency
+    if (df != NULL) 
+        free(df); // Libera a estrutura DocumentFrequency
 }

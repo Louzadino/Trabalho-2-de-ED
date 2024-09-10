@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     printf("Quantidade de documentos: %d\n", qtd_docs);
 
     // Tamanho da tabela hash
-    int table_size = qtd_docs * 2;
+    int table_size = 1999;
 
     // Criação do indexador de palavras
     WordIndexer *indexer = word_indexer_construct(table_size, hash_str, cmp_str);
@@ -69,28 +69,25 @@ int main(int argc, char *argv[])
     // Processa cada documento
     for (int i = 0; i < qtd_docs; i++) 
     {
-
         // Processa cada documento
         char doc_name[MAX_DOC_NAME];
         int qtd_words;
 
-        for (int j = 0; j < qtd_words; j++) 
+        fscanf(file, "%[^:]: %d: ", doc_name, &qtd_words);
+
+        printf("Nome do documento: %s\n", doc_name);
+        printf("Qtd de palavras: %d\n", qtd_words);
+
+        // Processa cada palavra do documento
+        for (int k = 0; k < qtd_words; k++)
         {
-            fscanf(file, "%[^:]: %d: ", doc_name, &qtd_words);
-            printf("Documento atual: %s\n", doc_name);
-            printf("Qtd de palavras: %d\n", qtd_words);
-
-            // Processa cada palavra do documento
-            for (int k = 0; k < qtd_words; k++)
-            {
-                char *word = (char *)malloc(100 * sizeof(char));
-                fscanf(file, "%s", word); 
-                printf("%s\n", word);
-                //word_indexer_add_word(indexer, word, doc_name);
-            }
-
-            fscanf(file, "\n");
+            char *word = (char *)malloc(100 * sizeof(char));
+            fscanf(file, "%s", word);
+            printf("Palavra atual: %s\n", word);
+            //word_indexer_add_word(indexer, word, doc_name);
         }
+
+        fscanf(file, "\n");
     }
 
     // Exibe o indexador de palavras no formato esperado

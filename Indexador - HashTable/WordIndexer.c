@@ -29,7 +29,6 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
     if (df_list == NULL) {
         df_list = list_construct();
         hash_table_set(indexer->table, word, df_list);
-        //printf("Criou nova lista para %s\n", word);
     }
 
     // Verifica se o documento já existe na lista de frequências
@@ -41,7 +40,6 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
 
         if (!(strcmp(current_doc_name, doc_name))) {
             doc_freq_increment(current_df);
-            //printf("Incrementou %s para %d em %s\n", word, doc_freq_get_frequency(current_df), doc_name);
             //free(word); // Libera a palavra
             return; // Saí da função se a frequência foi incrementada
         }
@@ -51,7 +49,6 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
     // Se o documento não foi encontrado, cria um novo DocumentFrequency
     DocumentFrequency *new_df = doc_freq_construct(doc_name); 
     list_push_front(df_list, new_df); // Certifique-se de que list_push_front não libere o novo_df
-    //printf("Adicionou %s em %s\n", word, doc_name);
 }
 
 
@@ -59,6 +56,9 @@ void word_indexer_print(WordIndexer *indexer)
 {
     HashTableIterator *it = hash_table_iterator(indexer->table);
     
+    // Imprime qtd de palavras encontradas no documento
+    printf("%d\n", hash_table_num_elems(indexer->table));
+
     while (!hash_table_iterator_is_over(it)) {
         HashTableItem *item = hash_table_iterator_next(it);
         
@@ -79,7 +79,7 @@ void word_indexer_print(WordIndexer *indexer)
 
             // Verifica se o documento é válido antes de imprimir
             if (current_doc_name != NULL) {
-                printf("%s %d ", current_doc_name, doc_freq_get_frequency(df));
+                printf("%d %s %d ", list_size(doc_list), current_doc_name, doc_freq_get_frequency(df));
             }
 
             n = n->next;
@@ -118,4 +118,3 @@ void word_indexer_destroy(WordIndexer *indexer)
     hash_table_destroy(indexer->table); // Libere a tabela hash
     free(indexer); // Libere o indexador
 }
-

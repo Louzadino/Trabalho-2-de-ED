@@ -137,6 +137,10 @@ int hash_table_size(HashTable *h)
     return h->table_size;
 }
 
+int hash_table_num_elems(HashTable *h)
+{
+    return h->num_elems;
+}
 
 void hash_table_destroy(HashTable *h)
 {

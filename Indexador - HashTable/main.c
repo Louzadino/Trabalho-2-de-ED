@@ -40,16 +40,11 @@ int cmp_string(const void *a, const void *b)
 
 #define MAX_DOC_NAME 100
 
-int main(int argc, char *argv[]) 
+int main() 
 {
 
-    // Verifica se o diretorio para a pasta de impressões foi informado
-
-    if (argc <= 1) 
-        exit(printf("ERRO: o diretorio para a pasta de impressões nao foi informado\n"));
-
     char dir[MAX_DIRECTORY];
-    sprintf(dir, "%s", argv[1]);
+    scanf("%s", dir);
     FILE *file = fopen(dir, "r");
 
     if (file == NULL) 
@@ -60,7 +55,7 @@ int main(int argc, char *argv[])
     fscanf(file, "%d\n", &qtd_docs);
 
     // Tamanho da tabela hash
-    int table_size = 1999;
+    int table_size = 2011;
 
     // Criação do indexador de palavras
     WordIndexer *indexer = word_indexer_construct(table_size, hash_str, cmp_str);
@@ -77,16 +72,16 @@ int main(int argc, char *argv[])
         // Processa cada palavra do documento
         for (int k = 0; k < qtd_words; k++)
         {
-            char *word = (char *)malloc(100 * sizeof(char));
+            char word[MAX_DOC_NAME];
             fscanf(file, "%s", word);
-            word_indexer_add_word(indexer, word, doc_name);
+            word_indexer_add_word(indexer, word, doc_name); // Adiciona a palavra ao indexador
         }
 
         fscanf(file, "\n");
     }
 
     // Exibe o indexador de palavras no formato esperado
-    word_indexer_print(indexer);
+    word_indexer_print_file(indexer);
 
     // Libera a memória alocada
     word_indexer_destroy(indexer);

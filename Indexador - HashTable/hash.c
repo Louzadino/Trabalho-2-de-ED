@@ -148,17 +148,6 @@ void hash_table_destroy(HashTable *h)
     for (int i = 0; i < size; i++)
     {
         List* l = h->buckets[i];
-        Node* n = list_get_head(l);
-
-        while(n)
-        {
-            HashTableItem *item = n->value;
-            free(item->key);
-            free(item->val);
-            free(item);
-            n = n->next;
-        }
-
         list_destroy(l);
     }
 

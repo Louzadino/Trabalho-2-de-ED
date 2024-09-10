@@ -28,7 +28,7 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
     // Se a palavra não foi encontrada na tabela, cria uma nova lista
     if (df_list == NULL) {
         df_list = list_construct();
-        hash_table_set(indexer->table, word, df_list);
+        hash_table_set(indexer->table, strdup(word), df_list);
     }
 
     // Verifica se o documento já existe na lista de frequências
@@ -40,7 +40,7 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
 
         if (!(strcmp(current_doc_name, doc_name))) {
             doc_freq_increment(current_df);
-            //free(word); // Libera a palavra
+            //free(word); // Libera a palavra se ela já existe
             return; // Saí da função se a frequência foi incrementada
         }
         n = n->next;
@@ -52,12 +52,14 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
 }
 
 
-void word_indexer_print(WordIndexer *indexer) 
+void word_indexer_print_file(WordIndexer *indexer) 
 {
     HashTableIterator *it = hash_table_iterator(indexer->table);
+
+    FILE *file = fopen("saida-indice.txt", "w");
     
     // Imprime qtd de palavras encontradas no documento
-    printf("%d\n", hash_table_num_elems(indexer->table));
+    fprintf(file ,"%d\n", hash_table_num_elems(indexer->table));
 
     while (!hash_table_iterator_is_over(it)) {
         HashTableItem *item = hash_table_iterator_next(it);
@@ -70,8 +72,11 @@ void word_indexer_print(WordIndexer *indexer)
         char *word = (char *) item->key;
         List *doc_list = (List *) item->val;
         
-        printf("%s ", word);
+        fprintf(file, "%s ", word);
         Node *n = list_get_head(doc_list);
+
+        // Imprime a frequência da palavra em cada documento
+        fprintf(file, "%d ", list_size(doc_list));
         
         while (n != NULL) {
             DocumentFrequency *df = (DocumentFrequency *)n->value;
@@ -79,16 +84,18 @@ void word_indexer_print(WordIndexer *indexer)
 
             // Verifica se o documento é válido antes de imprimir
             if (current_doc_name != NULL) {
-                printf("%d %s %d ", list_size(doc_list), current_doc_name, doc_freq_get_frequency(df));
+                fprintf(file, "%s %d ", current_doc_name, doc_freq_get_frequency(df));
             }
 
             n = n->next;
         }
-        printf("\n");
+        fprintf(file, "\n");
     }
     
     // Libera o iterador
     hash_table_iterator_destroy(it);
+    fclose(file);
+    printf("Arquivo de impressão criado com sucesso\n");
 }
 
 HashTable* word_indexer_get_table(WordIndexer *indexer) 
@@ -101,8 +108,9 @@ void word_indexer_destroy(WordIndexer *indexer)
     HashTableIterator *it = hash_table_iterator(indexer->table);
     
     while (!hash_table_iterator_is_over(it)) {
-        char *word = (char *)hash_table_iterator_next(it);
-        List *doc_list = hash_table_get(indexer->table, word);
+        HashTableItem *item = (HashTableItem*)hash_table_iterator_next(it);
+        List *doc_list = item->val;
+        char *word = item->key;
 
         // Destrói a lista de DocumentFrequency
         Node *n = list_get_head(doc_list);
@@ -112,6 +120,8 @@ void word_indexer_destroy(WordIndexer *indexer)
             n = n->next;
         }
         list_destroy(doc_list); // Libere a lista
+        free(word); // Libere a palavra
+        free(item); // Libere o item
     }
     
     hash_table_iterator_destroy(it);

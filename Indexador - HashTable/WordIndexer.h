@@ -14,7 +14,7 @@ WordIndexer *word_indexer_construct(int table_size, HashFunction hash_fn, CmpFun
 
 void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name);
 
-void word_indexer_print(WordIndexer *indexer);
+void word_indexer_print_file(WordIndexer *indexer);
 
 HashTable* word_indexer_get_table(WordIndexer *indexer);
 

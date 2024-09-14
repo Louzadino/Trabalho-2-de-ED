@@ -95,7 +95,6 @@ void word_indexer_print_file(WordIndexer *indexer)
     // Libera o iterador
     hash_table_iterator_destroy(it);
     fclose(file);
-    printf("Arquivo de impressão criado com sucesso\n");
 }
 
 HashTable* word_indexer_get_table(WordIndexer *indexer) 

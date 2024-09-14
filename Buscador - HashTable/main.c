@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "search.h"
-#include "hash.h"
-#include "list.h"
-#include "document_frequency.h"
 
 int hash_str(HashTable *h, void *data)
 {
@@ -26,9 +23,8 @@ int cmp_str(void *a, void *b)
 
 int cmp_string(const void *a, const void *b)
 {
-    return cmp_str(((HashTableItem *)a)->key, ((HashTableItem *)b)->key);
+    return cmp_str((char *)a, (char *)b);
 }
-
 
 int main()
 {
@@ -43,8 +39,16 @@ int main()
     scanf("%s", index_file);
     load_index(index_table, index_file);
 
+    // Leitura das stopwords
+    Vector *stopwords = vector_construct();
+
+    char stopwords_file[MAX_DOC_NAME];
+    scanf("%s", stopwords_file);
+    load_stopwords(stopwords, stopwords_file, cmp_string);
+
     // Libera a memória alocada
     hash_table_destroy(index_table);
+    vector_destroy(stopwords);
 
     return 0;
 }

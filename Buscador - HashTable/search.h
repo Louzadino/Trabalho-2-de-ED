@@ -4,6 +4,7 @@
 
 #include "hash.h"
 #include "document_frequency.h"
+#include "document_relevance.h"
 #include "list.h"
 #include "vector.h"
 
@@ -20,5 +21,6 @@ void process_query(HashTable *index_table, Vector *stopwords,
                     int (*hash_str)(HashTable*, void*), 
                     int (*cmp_str)(void*, void*));
 
+void display_top_documents(HashTable *doc_relevances);
 
 #endif

@@ -71,8 +71,7 @@ void load_stopwords(Vector *stopwords, const char *file_name, int (*cmp)(const v
     fclose(file);
 }
 
-void process_query(HashTable *index_table, Vector *stopwords, 
-                    int (*cmp)(const void*, const void*), 
+void process_query(HashTable *index_table, Vector *stopwords, int (*cmp)(const void*, const void*), 
                     int (*hash_str)(HashTable*, void*), 
                     int (*cmp_str)(void*, void*))
 {
@@ -80,6 +79,7 @@ void process_query(HashTable *index_table, Vector *stopwords,
     char query[MAX_QUERY_SIZE];
     Vector *query_words = vector_construct();
 
+    // Leitura da query (consulta do usuário)
     scanf(" %[^\n]", query);
 
     // Separar as palavras da consulta
@@ -104,28 +104,65 @@ void process_query(HashTable *index_table, Vector *stopwords,
         // Busca a palavra na tabela hash
         List *doc_freq_list = hash_table_get(index_table, word);
 
-        // Se a palavra foi encontrada
-        if (doc_freq_list) 
+        // Verifica se a palavra foi encontrada e se a lista é válida
+        if (doc_freq_list != NULL) 
         {
-            ListIterator *it = list_front_iterator(doc_freq_list);
-            while (!list_iterator_is_over(it))
+            // Para cada DocumentFrequency da palavra
+            Node *n = list_get_head(doc_freq_list);
+            while (n != NULL) 
             {
-                DocumentFrequency *doc_freq = (DocumentFrequency*)list_iterator_next(it);
-                char* doc_name = doc_freq_get_name(doc_freq);
+                DocumentFrequency *doc_freq = (DocumentFrequency *)n->value;
+                char *doc_name = doc_freq_get_name(doc_freq);
                 int freq = doc_freq_get_frequency(doc_freq);
 
-
-                // Acumula a relevancia do documento na hash doc_relevances
+                // Se o documento já está na tabela de relevância, incrementa a relevância
                 int *relevance = hash_table_get(doc_relevances, doc_name);
-                if (!relevance) // Caso o documento ainda não tenha sido adicionado
+                if (relevance != NULL) 
+                    (*relevance) += freq;
+                else 
                 {
-                    relevance = (int*) malloc(sizeof(int));
-                    *relevance = 0;
+                    // Se o documento não está na tabela de relevância, adiciona-o
+                    relevance = (int *)malloc(sizeof(int));
+                    *relevance = freq;
                     hash_table_set(doc_relevances, strdup(doc_name), relevance);
                 }
 
-                *relevance += freq;
+                n = n->next;
             }
         }
     }
+
+    // Ordena e exibe os documentos mais relevantes
+    display_top_documents(doc_relevances);
+
+    // Limpar memória
+    vector_destroy(query_words);
+    hash_table_destroy(doc_relevances);
+}
+
+
+void display_top_documents(HashTable *doc_relevances) 
+{
+    Vector *documents = vector_construct();
+
+    // Converter o hash de relevância para um vetor de documentos
+    HashTableIterator *it = hash_table_iterator(doc_relevances);
+    while (!hash_table_iterator_is_over(it)) {
+        HashTableItem *item = hash_table_iterator_next(it);
+        char *doc_name = (char*)item->key;
+        int *relevance = (int*)item->val;
+        vector_push_back(documents, doc_rel_construct(doc_name, *relevance));
+    }
+    hash_table_iterator_destroy(it);
+
+    // Ordenar os documentos por relevância e em ordem alfabética se houver empate
+    vector_sort(documents, cmp_doc_rel);
+
+    int size = vector_size(documents);
+    for (int i = 0; i < size; i++) {
+        DocumentRelevance *doc = vector_get(documents, i);
+        printf("%s %d\n", doc_rel_get_name(doc), doc_rel_get_relevance(doc));
+    }
+
+    vector_destroy(documents);
 }

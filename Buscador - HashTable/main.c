@@ -47,7 +47,7 @@ int main()
     load_stopwords(stopwords, stopwords_file, cmp_string);
 
     // Leitura e processamento das palavras da consulta
-    process_query(index_table, stopwords, cmp_string);
+    //process_query(index_table, stopwords, cmp_string);
 
     // Libera a memória alocada
     hash_table_destroy(index_table);

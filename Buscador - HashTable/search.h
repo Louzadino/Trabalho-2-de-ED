@@ -15,6 +15,10 @@ void load_index(HashTable *index_table, const char *file_name);
 
 void load_stopwords(Vector *stopwords, const char *file_name, int (*cmp)(const void*, const void*));
 
-void process_query(HashTable *index_table, Vector *stopwords, int (*cmp)(const void*, const void*));
+void process_query(HashTable *index_table, Vector *stopwords, 
+                    int (*cmp)(const void*, const void*), 
+                    int (*hash_str)(HashTable*, void*), 
+                    int (*cmp_str)(void*, void*));
+
 
 #endif

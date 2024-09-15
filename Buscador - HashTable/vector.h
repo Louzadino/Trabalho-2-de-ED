@@ -43,7 +43,7 @@ void vector_swap(Vector *v, int i, int j);
 void vector_sort(Vector *v, int (cmp_fn)(const void* prod1, const void* prod2));
 
 // Retorna o indice de val usando busca binaria. Retorna -1 se nao encontrado.
-int vector_binary_search(Vector *v, data_type val);
+int vector_binary_search(Vector *v, data_type val, int (*cmp)(const void *, const void *));
 
 // Inverte o vetor in-place (sem criar um novo vetor)
 void vector_reverse(Vector *v);

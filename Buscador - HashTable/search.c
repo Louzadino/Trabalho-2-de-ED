@@ -68,8 +68,40 @@ void load_stopwords(Vector *stopwords, const char *file_name, int (*cmp)(const v
         vector_push_back(stopwords, strdup(word));
     }
 
-    // Ordenação em ordem alfabética do vetor de stopwords
-    vector_sort(stopwords, cmp);
-
     fclose(file);
+}
+
+void process_query(HashTable *index_table, Vector *stopwords, int (*cmp)(const void*, const void*))
+{
+    // Lê a consulta do usuário
+    char query[MAX_QUERY_SIZE];
+    Vector *query_words = vector_construct();
+
+    scanf(" %[^\n]", query);
+
+    // Separar as palavras da consulta
+    char *word = strtok(query, " ");
+    while (word != NULL) 
+    {
+        // Se não for uma stopword, adiciona a palavra ao vetor de palavras da consulta
+        if (vector_binary_search(stopwords, word, cmp) == -1)
+            vector_push_back(query_words, strdup(word));
+
+        word = strtok(NULL, " ");
+    }
+
+    // Para cada palavra da consulta
+    for (int i = 0; i < vector_size(query_words); i++) 
+    {
+        char *word = vector_get(query_words, i);
+
+        // Busca a palavra na tabela hash
+        List *doc_freq_list = hash_table_get(index_table, word);
+
+        // Se a palavra foi encontrada
+        if (doc_freq_list) 
+        {
+            
+        }
+    }
 }

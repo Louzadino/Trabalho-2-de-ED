@@ -196,25 +196,27 @@ void vector_sort(Vector *v, int (cmp_fn)(const void* prod1, const void* prod2)){
     }
 }
 
- int vector_binary_search(Vector *v, data_type val){
-
+int vector_binary_search(Vector *v, data_type val, int (*cmp)(const void *, const void *)) {
     int idx_min = 0, idx_max = vector_size(v) - 1, idx_mid;
 
-    while (idx_min <= idx_max){
-
+    while (idx_min <= idx_max) {
         idx_mid = (idx_min + idx_max) / 2;
 
-        if (v->data[idx_mid] == val){
-            return idx_mid;
-        } else if (val < v->data[idx_mid]){
+        // Usando a função de comparação genérica
+        int comparison = cmp(val, v->data[idx_mid]);
+
+        if (comparison == 0) {
+            return idx_mid;  // Elemento encontrado
+        } else if (comparison < 0) {
             idx_max = idx_mid - 1;
-        } else if (val > v->data[idx_mid]){
+        } else {
             idx_min = idx_mid + 1;
         }
     }
 
-    return -1;
+    return -1;  // Elemento não encontrado
 }
+
 
 void vector_reverse(Vector *v){
 

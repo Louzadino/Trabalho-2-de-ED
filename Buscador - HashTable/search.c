@@ -135,8 +135,24 @@ void process_query(HashTable *index_table, Vector *stopwords, int (*cmp)(const v
     // Ordena e exibe os documentos mais relevantes
     display_top_documents(doc_relevances);
 
-    // Limpar memória
+    // Destruição do vetor de palavras da consulta
+    int query_words_size = vector_size(query_words);
+    for (int i = 0; i < query_words_size; i++) 
+        free(vector_get(query_words, i));
+
     vector_destroy(query_words);
+
+    // Destruição da tabela de relevância
+    HashTableIterator *it = hash_table_iterator(doc_relevances);
+    while (!hash_table_iterator_is_over(it)) 
+    {
+        HashTableItem *item = hash_table_iterator_next(it);
+        free(item->key);
+        free(item->val);
+        free(item);
+    }
+
+    hash_table_iterator_destroy(it);
     hash_table_destroy(doc_relevances);
 }
 
@@ -164,5 +180,11 @@ void display_top_documents(HashTable *doc_relevances)
         printf("%s %d\n", doc_rel_get_name(doc), doc_rel_get_relevance(doc));
     }
 
+    // Limpar memória
+    for (int i = 0; i < size; i++) {
+        DocumentRelevance *doc = vector_get(documents, i);
+        doc_rel_destroy(doc);
+    }
+    
     vector_destroy(documents);
 }

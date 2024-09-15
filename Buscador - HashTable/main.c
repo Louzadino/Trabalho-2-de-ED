@@ -49,8 +49,37 @@ int main()
     // Leitura e processamento das palavras da consulta
     process_query(index_table, stopwords, cmp_string, hash_str, cmp_str);
 
-    // Libera a memória alocada
+    // Destruição da tabela hash de indices
+
+    HashTableIterator *it = hash_table_iterator(index_table);
+
+    while (!hash_table_iterator_is_over(it))
+    {
+        HashTableItem *item = hash_table_iterator_next(it);
+        List *doc_list = item->val;
+        char *word = item->key;
+
+        // Destrói a lista de DocumentFrequency
+        Node *n = list_get_head(doc_list);
+        while (n != NULL)
+        {
+            DocumentFrequency *df = (DocumentFrequency *)n->value;
+            doc_freq_destroy(df); // Certifique-se de que isso está correto
+            n = n->next;
+        }
+        list_destroy(doc_list);
+        free(word);
+        free(item);
+    }
     hash_table_destroy(index_table);
+    hash_table_iterator_destroy(it);
+
+    // Destruição das stopwords
+
+    int size = vector_size(stopwords);
+    for (int i = 0; i < size; i++)
+        free(vector_get(stopwords, i));
+
     vector_destroy(stopwords);
 
     return 0;

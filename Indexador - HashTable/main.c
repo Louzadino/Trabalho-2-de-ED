@@ -10,16 +10,23 @@
 
 #define MAX_DIRECTORY 1000
 
-
-int hash_str(HashTable *h, void *data)
+int hash_str(HashTable *table, void *key)
 {
-    char *str = (char *)data;
+    char *str = key;
 
-    long hash_val = 0;
-    int base = 127;
+    int table_size = hash_table_size(table);
 
-    for (size_t i = 0; i < strlen(str); i++)
-        hash_val = (base * hash_val + str[i]) % hash_table_size(h);
+    unsigned long hash_val = 0, base = 27183;
+    unsigned long random_val = 31415;
+
+    int size = strlen(str);
+
+    for (int i = 0; i < size; i++)
+    {
+        hash_val = (hash_val * random_val + str[i]) % table_size;
+
+        random_val = (random_val * base) % (table_size - 1);
+    }
 
     return hash_val;
 }
@@ -55,7 +62,7 @@ int main()
     fscanf(file, "%d\n", &qtd_docs);
 
     // Tamanho da tabela hash
-    int table_size = 2011;
+    int table_size = 919;
 
     // Criação do indexador de palavras
     WordIndexer *indexer = word_indexer_construct(table_size, hash_str, cmp_str);

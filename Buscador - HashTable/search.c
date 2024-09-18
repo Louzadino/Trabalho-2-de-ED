@@ -163,7 +163,8 @@ void display_top_documents(HashTable *doc_relevances)
 
     // Converter o hash de relevância para um vetor de documentos
     HashTableIterator *it = hash_table_iterator(doc_relevances);
-    while (!hash_table_iterator_is_over(it)) {
+    while (!hash_table_iterator_is_over(it)) 
+    {
         HashTableItem *item = hash_table_iterator_next(it);
         char *doc_name = (char*)item->key;
         int *relevance = (int*)item->val;
@@ -175,13 +176,17 @@ void display_top_documents(HashTable *doc_relevances)
     vector_sort(documents, cmp_doc_rel);
 
     int size = vector_size(documents);
-    for (int i = 0; i < size; i++) {
+    if (size > 10) size = 10; // Apenas exibe os 10 documentos mais relevantes
+
+    for (int i = 0; i < size; i++) 
+    {
         DocumentRelevance *doc = vector_get(documents, i);
         printf("%s %d\n", doc_rel_get_name(doc), doc_rel_get_relevance(doc));
     }
 
     // Limpar memória
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) 
+    {
         DocumentRelevance *doc = vector_get(documents, i);
         doc_rel_destroy(doc);
     }

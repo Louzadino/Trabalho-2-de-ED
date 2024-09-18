@@ -55,11 +55,9 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
 void word_indexer_print_file(WordIndexer *indexer) 
 {
     HashTableIterator *it = hash_table_iterator(indexer->table);
-
-    FILE *file = fopen("saida-indice.txt", "w");
     
     // Imprime qtd de palavras encontradas no documento
-    fprintf(file ,"%d\n", hash_table_num_elems(indexer->table));
+    printf("%d\n", hash_table_num_elems(indexer->table));
 
     while (!hash_table_iterator_is_over(it)) {
         HashTableItem *item = hash_table_iterator_next(it);
@@ -72,11 +70,11 @@ void word_indexer_print_file(WordIndexer *indexer)
         char *word = (char *) item->key;
         List *doc_list = (List *) item->val;
         
-        fprintf(file, "%s ", word);
+        printf("%s ", word);
         Node *n = list_get_head(doc_list);
 
         // Imprime a frequência da palavra em cada documento
-        fprintf(file, "%d ", list_size(doc_list));
+        printf("%d ", list_size(doc_list));
         
         while (n != NULL) {
             DocumentFrequency *df = (DocumentFrequency *)n->value;
@@ -84,17 +82,21 @@ void word_indexer_print_file(WordIndexer *indexer)
 
             // Verifica se o documento é válido antes de imprimir
             if (current_doc_name != NULL) {
-                fprintf(file, "%s %d ", current_doc_name, doc_freq_get_frequency(df));
+                printf("%s %d", current_doc_name, doc_freq_get_frequency(df));
+
+                if (n->next != NULL)
+                    printf(" ");
             }
 
             n = n->next;
         }
-        fprintf(file, "\n");
+        
+        if (!hash_table_iterator_is_over(it))
+            printf("\n");
     }
     
     // Libera o iterador
     hash_table_iterator_destroy(it);
-    fclose(file);
 }
 
 HashTable* word_indexer_get_table(WordIndexer *indexer) 

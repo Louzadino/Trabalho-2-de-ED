@@ -8,33 +8,27 @@ typedef int (*CmpFn)(void *, void *);
 typedef void (*KeyDestroyFn)(void *);
 typedef void (*ValDestroyFn)(void *);
 
+typedef struct BinaryTree BinaryTree;
+
 typedef struct
 {
     void *key;
     void *value;
 } KeyValPair;
 
-typedef struct Node
+typedef struct NodeBinaryTree
 {
     void *key;
     void *value;
-    struct Node *left;
-    struct Node *right;
-} Node;
-
-typedef struct
-{
-    Node *root;
-    CmpFn cmp_fn;
-    KeyDestroyFn key_destroy_fn;
-    ValDestroyFn val_destroy_fn;
-} BinaryTree;
+    struct NodeBinaryTree *left;
+    struct NodeBinaryTree *right;
+} NodeBinaryTree;
 
 KeyValPair *key_val_pair_construct(void *key, void *val);
 void key_val_pair_destroy(KeyValPair *kvp);
 
-Node *node_construct(void *key, void *value, Node *left, Node *right);
-void node_destroy(Node *node);
+NodeBinaryTree *node_binary_tree_construct(void *key, void *value, NodeBinaryTree *left, NodeBinaryTree *right);
+void node_binary_tree_destroy(NodeBinaryTree *node);
 
 BinaryTree *binary_tree_construct(
     CmpFn cmp_fn, KeyDestroyFn key_destroy_fn,
@@ -61,5 +55,7 @@ Vector *binary_tree_levelorder_traversal(BinaryTree *bt);
 Vector *binary_tree_inorder_traversal_recursive(BinaryTree *bt);
 Vector *binary_tree_preorder_traversal_recursive(BinaryTree *bt);
 Vector *binary_tree_postorder_traversal_recursive(BinaryTree *bt);
+
+// Funcoes extras que adicionei no programa
 
 #endif

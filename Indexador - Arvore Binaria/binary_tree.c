@@ -4,6 +4,14 @@
 #include "binary_tree.h"
 #include "deque.h"
 
+struct BinaryTree
+{
+    NodeBinaryTree *root;
+    CmpFn cmp_fn;
+    KeyDestroyFn key_destroy_fn;
+    ValDestroyFn val_destroy_fn;
+};
+
 KeyValPair *key_val_pair_construct(void *key, void *val)
 {
     KeyValPair *kvp = malloc(sizeof(KeyValPair));
@@ -28,9 +36,9 @@ void key_val_pair_destroy(KeyValPair *kvp)
     return;
 }
 
-Node *node_construct(void *key, void *value, Node *left, Node *right)
+NodeBinaryTree *node_binary_tree_construct(void *key, void *value, NodeBinaryTree *left, NodeBinaryTree *right)
 {
-    Node *node = malloc(sizeof(Node));
+    NodeBinaryTree *node = malloc(sizeof(NodeBinaryTree));
 
     if (!node) exit(printf("ERRO: falha ao alocar memoria para o no\n"));
 
@@ -42,13 +50,13 @@ Node *node_construct(void *key, void *value, Node *left, Node *right)
     return node;
 }
 
-void node_destroy(Node *node) 
+void node_binary_tree_destroy(NodeBinaryTree *node) 
 {
     if (node) // Se o nó não for nulo
     {
         // Destruir os filhos do nó atual
-        node_destroy(node->left);
-        node_destroy(node->right);
+        node_binary_tree_destroy(node->left);
+        node_binary_tree_destroy(node->right);
 
         // Destruir o nó atual
         if (node->key) free(node->key);
@@ -86,14 +94,14 @@ void binary_tree_add(BinaryTree *bt, void *key, void *value)
         return;
     }
 
-    Node* new_node = node_construct(key, value, NULL, NULL);
+    NodeBinaryTree* new_node = node_binary_tree_construct(key, value, NULL, NULL);
 
     if (!bt->root) { // Se a árvore estiver vazia (raiz é nula)
         bt->root = new_node;
         return;
     }
 
-    Node *current = bt->root;
+    NodeBinaryTree *current = bt->root;
     while(1) {
         if (bt->cmp_fn(key, current->key) <= 0) {
             if (!current->left) // Se o nó atual não tiver filho à esquerda
@@ -115,10 +123,10 @@ void binary_tree_add(BinaryTree *bt, void *key, void *value)
     }
 }
 
-Node* binary_tree_add_recursive_aux(Node *node, void *key, void *value, BinaryTree *bt)
+NodeBinaryTree* binary_tree_add_recursive_aux(NodeBinaryTree *node, void *key, void *value, BinaryTree *bt)
 {
     if (!node) // Se o nó for nulo
-        return node_construct(key, value, NULL, NULL);
+        return node_binary_tree_construct(key, value, NULL, NULL);
 
     if (bt->cmp_fn(key, node->key) <= 0) // Se a chave for menor ou igual à chave do nó atual
         node->left = binary_tree_add_recursive_aux(node->left, key, value, bt);
@@ -150,9 +158,9 @@ int binary_tree_empty(BinaryTree *bt)
 
 void binary_tree_remove(BinaryTree *bt, void *key)
 {
-    Node *current = bt->root;
-    Node *parent = NULL;
-    Node *removed_node = NULL; // Nó a ser removido (deve ser liberado)
+    NodeBinaryTree *current = bt->root;
+    NodeBinaryTree *parent = NULL;
+    NodeBinaryTree *removed_node = NULL; // Nó a ser removido (deve ser liberado)
 
     // Encontrar o nó a ser removido
     while (current)
@@ -191,7 +199,7 @@ void binary_tree_remove(BinaryTree *bt, void *key)
     // Caso 2: nó a ser removido tem um filho
     else if (!removed_node->left || !removed_node->right)
     {
-        Node *child = removed_node->left ? removed_node->left : removed_node->right;
+        NodeBinaryTree *child = removed_node->left ? removed_node->left : removed_node->right;
 
         if (parent) // Se o nó a ser removido não for a raiz
         {
@@ -205,8 +213,8 @@ void binary_tree_remove(BinaryTree *bt, void *key)
     // Caso 3: nó a ser removido tem dois filhos
     else
     {
-        Node *successor = removed_node->right;
-        Node *successor_parent = removed_node;
+        NodeBinaryTree *successor = removed_node->right;
+        NodeBinaryTree *successor_parent = removed_node;
 
         // Encontrar o nó sucessor (menor nó à direita do nó a ser removido)
         while (successor->left)
@@ -243,7 +251,7 @@ void binary_tree_remove(BinaryTree *bt, void *key)
 
 KeyValPair *binary_tree_min(BinaryTree *bt)
 {
-    Node *current = bt->root;
+    NodeBinaryTree *current = bt->root;
 
     if (binary_tree_empty(bt)) return NULL; // Se a árvore estiver vazia
 
@@ -255,7 +263,7 @@ KeyValPair *binary_tree_min(BinaryTree *bt)
 
 KeyValPair *binary_tree_max(BinaryTree *bt)
 {
-    Node *current = bt->root;
+    NodeBinaryTree *current = bt->root;
 
     if (binary_tree_empty(bt)) return NULL; // Se a árvore estiver vazia
 
@@ -267,7 +275,7 @@ KeyValPair *binary_tree_max(BinaryTree *bt)
 
 KeyValPair *binary_tree_pop_min(BinaryTree *bt)
 {
-    Node *current = bt->root;
+    NodeBinaryTree *current = bt->root;
 
     if (binary_tree_empty(bt)) return NULL; // Se a árvore estiver vazia
 
@@ -293,7 +301,7 @@ KeyValPair *binary_tree_pop_min(BinaryTree *bt)
 
 KeyValPair *binary_tree_pop_max(BinaryTree *bt)
 {
-    Node *current = bt->root;
+    NodeBinaryTree *current = bt->root;
 
     if (binary_tree_empty(bt)) return NULL; // Se a árvore estiver vazia
 
@@ -319,7 +327,7 @@ KeyValPair *binary_tree_pop_max(BinaryTree *bt)
 
 void *binary_tree_get(BinaryTree *bt, void *key)
 {
-    Node *current = bt->root;
+    NodeBinaryTree *current = bt->root;
 
     while (current)
     {
@@ -339,7 +347,7 @@ void binary_tree_destroy(BinaryTree *bt)
     if (bt) 
     {
         // Destruir todos os nós da árvore
-        node_destroy(bt->root);
+        node_binary_tree_destroy(bt->root);
 
         // Liberar a estrutura da árvore
         free(bt);
@@ -348,13 +356,13 @@ void binary_tree_destroy(BinaryTree *bt)
     return;
 }
 
-void binary_tree_print_recursive(Node *node)
+void binary_tree_print_recursive(NodeBinaryTree *node)
 {
 
     if (node)
     {   
         printf("(");
-        printf("%d, ", *(int *)node->key);
+        printf("%s, ", (char*)node->key);
         binary_tree_print_recursive(node->left);
         printf(", ");
         binary_tree_print_recursive(node->right);
@@ -378,7 +386,7 @@ Vector *binary_tree_inorder_traversal(BinaryTree *bt)
 {
     Deque *stack = deque_construct();
     Vector *v = vector_construct();
-    Node* current_node = bt->root;
+    NodeBinaryTree* current_node = bt->root;
 
     while (1)
     {
@@ -409,7 +417,7 @@ Vector *binary_tree_preorder_traversal(BinaryTree *bt)
 
     while(deque_size(stack) > 0)
     {
-        Node *node = deque_pop_back(stack);
+        NodeBinaryTree *node = deque_pop_back(stack);
         vector_push_back(v, key_val_pair_construct(node->key, node->value));
         if (node->right) deque_push_back(stack, node->right);
         if (node->left) deque_push_back(stack, node->left);
@@ -428,7 +436,7 @@ Vector *binary_tree_postorder_traversal(BinaryTree *bt)
 
     while (deque_size(q1) > 0)
     {
-        Node* node = deque_pop_back(q1);
+        NodeBinaryTree* node = deque_pop_back(q1);
 
         if (node->left) deque_push_back(q1, node->left);
         if (node->right) deque_push_back(q1, node->right);
@@ -437,7 +445,7 @@ Vector *binary_tree_postorder_traversal(BinaryTree *bt)
 
     for (int i = deque_size(q2) - 1; i >= 0; i--)
     {
-        Node* node = deque_get(q2, i);
+        NodeBinaryTree* node = deque_get(q2, i);
         vector_push_back(v, key_val_pair_construct(node->key, node->value));
     }
 
@@ -455,7 +463,7 @@ Vector *binary_tree_levelorder_traversal(BinaryTree *bt)
 
     while (deque_size(queue) > 0)
     {
-        Node* node = deque_pop_back(queue);
+        NodeBinaryTree* node = deque_pop_back(queue);
         
         if (node != NULL)
         {
@@ -469,7 +477,7 @@ Vector *binary_tree_levelorder_traversal(BinaryTree *bt)
     return v;
 }
 
-Vector *binary_tree_inorder_traversal_recursive_aux(Node *node, Vector *v)
+Vector *binary_tree_inorder_traversal_recursive_aux(NodeBinaryTree *node, Vector *v)
 {
     if (node)
     {
@@ -488,7 +496,7 @@ Vector *binary_tree_inorder_traversal_recursive(BinaryTree *bt)
     return v;
 }
 
-Vector *binary_tree_preorder_traversal_recursive_aux(Node *node, Vector *v)
+Vector *binary_tree_preorder_traversal_recursive_aux(NodeBinaryTree *node, Vector *v)
 {
     if (node)
     {
@@ -507,7 +515,7 @@ Vector *binary_tree_preorder_traversal_recursive(BinaryTree *bt)
     return v;
 }
 
-Vector *binary_tree_postorder_traversal_recursive_aux(Node *node, Vector *v)
+Vector *binary_tree_postorder_traversal_recursive_aux(NodeBinaryTree *node, Vector *v)
 {
     if (node)
     {

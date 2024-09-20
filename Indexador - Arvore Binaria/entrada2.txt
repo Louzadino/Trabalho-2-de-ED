@@ -1,0 +1,9 @@
+8
+t1.txt: 12: politico politico duas acoes no tre no tre no tre acoes politico
+t2.txt: 11: papa pede acoes politico vice politico americano trabalhe pela politico paz
+t3.txt: 9: novos cursos do cefet em colatina na proxima terca
+t4.txt: 12: pedida cassacao de mais um relator do conselho de etica no tre
+t5.txt: 8: barco vira e mata cinco pessoas na bahia
+t6.txt: 12: politico faz gol em vice americano do conselho de etica na bahia
+t7.txt: 24: pintor digital do cefet digital faz gol digital pela paz digital gol pela paz digital gol pela paz no tre digital da bahia digital
+t8.txt: 11: mesa grafica digital vira e faz gol contra cinco politico americano

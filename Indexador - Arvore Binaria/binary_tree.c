@@ -60,7 +60,7 @@ void node_binary_tree_destroy(NodeBinaryTree *node)
 
         // Destruir o nó atual
         if (node->key) free(node->key);
-        if (node->value) free(node->value);
+        //if (node->value) free(node->value); // Valor deve ser liberado pelo usuário
 
         free(node);
     }
@@ -532,4 +532,9 @@ Vector *binary_tree_postorder_traversal_recursive(BinaryTree *bt)
     Vector *v = vector_construct();
     binary_tree_postorder_traversal_recursive_aux(bt->root, v);
     return v;
+}
+
+void *binary_tree_get_root(BinaryTree *bt)
+{
+    return bt->root;
 }

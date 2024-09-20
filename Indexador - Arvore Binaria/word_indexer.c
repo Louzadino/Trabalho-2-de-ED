@@ -104,6 +104,12 @@ void word_indexer_print_file(WordIndexer *indexer)
             printf("\n");
     }
 
+    for (int i = 0; i < vector_size(v); i++)
+    {
+        KeyValPair *kvp = (KeyValPair *)vector_get(v, i);
+        key_val_pair_destroy(kvp);
+    }
+
     vector_destroy(v);
 }
 
@@ -112,10 +118,29 @@ BinaryTree* word_indexer_get_binary_tree(WordIndexer *indexer)
     return indexer->tree;
 }
 
-void word_indexer_destroy(WordIndexer *indexer) 
+void word_indexer_destroy(WordIndexer *indexer)
 {
     BinaryTree *tree = indexer->tree;
+    Vector *v = binary_tree_inorder_traversal(tree);
 
+    for (int i = 0; i < vector_size(v); i++)
+    {
+        KeyValPair *kvp = (KeyValPair *)vector_get(v, i);
+        List *doc_list = (List *)kvp->value;
+        Node *n = list_get_head(doc_list);
+
+        while (n != NULL)
+        {
+            DocumentFrequency *df = (DocumentFrequency *)n->value;
+            doc_freq_destroy(df);
+            n = n->next;
+        }
+
+        list_destroy(doc_list);
+        key_val_pair_destroy(kvp);
+    }
+
+    vector_destroy(v);
     binary_tree_destroy(tree);
     free(indexer);
 }

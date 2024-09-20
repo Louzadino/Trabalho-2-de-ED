@@ -57,5 +57,6 @@ Vector *binary_tree_preorder_traversal_recursive(BinaryTree *bt);
 Vector *binary_tree_postorder_traversal_recursive(BinaryTree *bt);
 
 // Funcoes extras que adicionei no programa
+void *binary_tree_get_root(BinaryTree *bt);
 
 #endif

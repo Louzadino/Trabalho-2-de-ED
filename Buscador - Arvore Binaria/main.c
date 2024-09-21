@@ -3,7 +3,8 @@
 #include <string.h>
 #include "document_frequency.h"
 #include "vector.h"
-#include "word_indexer.h"
+#include "binary_tree.h"
+#include "search.h"
 
 #define MAX_DIRECTORY 1000
 
@@ -63,17 +64,15 @@ int main()
     load_stopwords(stopwords, stopwords_file, cmp_string);
 
     // Leitura e processamento das palavras da consulta
-    process_query(index_tree, stopwords, cmp_string, cmp_fn, cmp_str);
+    process_query(index_tree, stopwords, cmp_fn, key_destroy_fn, val_destroy_fn, cmp_string);
 
-    // Destruição da tabela hash de indices
-    /*
-    HashTableIterator *it = hash_table_iterator(index_table);
+    // Destruição da arvore binaria de indices
+    Vector *v = binary_tree_inorder_traversal(index_tree);
 
-    while (!hash_table_iterator_is_over(it))
+    for (int i = 0; i < vector_size(v); i++)
     {
-        HashTableItem *item = hash_table_iterator_next(it);
-        List *doc_list = item->val;
-        char *word = item->key;
+        KeyValPair *kvp = (KeyValPair *)vector_get(v, i);
+        List *doc_list = (List *)kvp->value;
 
         // Destrói a lista de DocumentFrequency
         Node *n = list_get_head(doc_list);
@@ -84,11 +83,10 @@ int main()
             n = n->next;
         }
         list_destroy(doc_list);
-        free(word);
-        free(item);
+        key_val_pair_destroy(kvp);
     }
-    hash_table_destroy(index_table);
-    hash_table_iterator_destroy(it);
+    vector_destroy(v);
+    binary_tree_destroy(index_tree);
 
     // Destruição das stopwords
 
@@ -97,7 +95,6 @@ int main()
         free(vector_get(stopwords, i));
 
     vector_destroy(stopwords);
-    */
 
     return 0;
 }

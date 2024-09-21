@@ -74,7 +74,8 @@ void load_stopwords(Vector *stopwords, const char *file_name, int (*cmp)(const v
 void process_query(BinaryTree *index_tree, Vector *stopwords, 
                     CmpFn cmp_fn,
                     KeyDestroyFn key_destroy_fn,
-                    ValDestroyFn val_destroy_fn)
+                    ValDestroyFn val_destroy_fn,
+                    int (*cmp)(const void*, const void*))
 {
     // Lê a consulta do usuário
     char query[MAX_QUERY_SIZE];
@@ -88,7 +89,7 @@ void process_query(BinaryTree *index_tree, Vector *stopwords,
     while (word != NULL) 
     {
         // Se não for uma stopword, adiciona a palavra ao vetor de palavras da consulta
-        if (vector_binary_search(stopwords, word, cmp_fn) == -1)
+        if (vector_binary_search(stopwords, word, cmp) == -1)
             vector_push_back(query_words, strdup(word));
 
         word = strtok(NULL, " ");
@@ -103,7 +104,7 @@ void process_query(BinaryTree *index_tree, Vector *stopwords,
         char *word = vector_get(query_words, i);
 
         // Busca a palavra na arvore binaria
-        List *doc_freq_list = binary_tree_get(index_tree, word);
+        List *doc_freq_list = (List *)binary_tree_get(index_tree, word);
 
         // Verifica se a palavra foi encontrada e se a lista é válida
         if (doc_freq_list != NULL) 
@@ -117,26 +118,26 @@ void process_query(BinaryTree *index_tree, Vector *stopwords,
                 int freq = doc_freq_get_frequency(doc_freq);
 
                 // Se o documento já está na arvore de relevância, incrementa a relevância
-                int *relevance = binary_tree_get(doc_relevances, doc_name);
+                int *relevance = (int *)binary_tree_get(doc_relevances, doc_name);
                 if (relevance != NULL) 
                 {
                     *relevance += freq;
-                }
-                else // Se o documento não está na arvore de relevância, adiciona
+                } 
+                else 
                 {
-                    binary_tree_add(doc_relevances, strdup(doc_name), new_int(freq));
+                    // Se o documento não está na arvore de relevância, adiciona
+                    int *new_relevance = (int *)malloc(sizeof(int));
+                    *new_relevance = freq;
+                    binary_tree_add(doc_relevances, strdup(doc_name), new_relevance);
                 }
 
                 n = n->next;
             }
         }
     }
-
+    
     // Exibe os documentos mais relevantes
     display_top_documents(doc_relevances);
-
-    // Destrói a arvore de relevâncias
-    binary_tree_destroy(doc_relevances);
 
     // Destruição do vetor de palavras da consulta
     int query_words_size = vector_size(query_words);
@@ -151,6 +152,8 @@ void process_query(BinaryTree *index_tree, Vector *stopwords,
     for (int i = 0; i < vector_size(v); i++)
     {
         KeyValPair *kvp = (KeyValPair *)vector_get(v, i);
+        int *relevance = (int *)kvp->value;
+        free(relevance); // Libera a relevância (usuario deve libera values da arvore binaria)
         key_val_pair_destroy(kvp);
     }
 
@@ -160,24 +163,44 @@ void process_query(BinaryTree *index_tree, Vector *stopwords,
 
 void display_top_documents(BinaryTree *doc_relevances)
 {
-    Vector *documents = binary_tree_inorder_traversal(doc_relevances);
+    Vector *documents = vector_construct();
 
-    // Imprime qtd de documentos encontrados
-    printf("%d\n", vector_size(documents));
-
-    for (int i = 0; i < vector_size(documents); i++)
+    // Converter a arvore de relevância para um vetor de documentos
+    Vector *v = binary_tree_inorder_traversal(doc_relevances);
+    for (int i = 0; i < vector_size(v); i++)
     {
-        KeyValPair *kvp = (KeyValPair *)vector_get(documents, i);
-        char *doc_name = (char *)kvp->key;
-        int relevance = *((int *)kvp->value);
-
-        printf("%s %d\n", doc_name, relevance);
+        KeyValPair *kvp = (KeyValPair *)vector_get(v, i);
+        char* doc_name = (char *)kvp->key;
+        int *relevance = (int *)kvp->value;
+        vector_push_back(documents, doc_rel_construct(doc_name, *relevance));
     }
 
-    for (int i = 0; i < vector_size(documents); i++)
+    // Libera o vetor de pares chave-valor
+    for (int i = 0; i < vector_size(v); i++)
     {
-        KeyValPair *kvp = (KeyValPair *)vector_get(documents, i);
+        KeyValPair *kvp = (KeyValPair *)vector_get(v, i);
         key_val_pair_destroy(kvp);
+    }
+
+    vector_destroy(v);
+
+    // Ordena os documentos por relevância e em ordem alfabética se houver empate
+    vector_sort(documents, cmp_doc_rel);
+
+    int size = vector_size(documents);
+    if (size > 10) size = 10; // Exibe apenas os 10 documentos mais relevantes
+
+    for (int i = 0; i < size; i++) 
+    {
+        DocumentRelevance *doc_rel = (DocumentRelevance *)vector_get(documents, i);
+        printf("%s %d\n", doc_rel_get_name(doc_rel), doc_rel_get_relevance(doc_rel));
+    }
+
+    // Destroi os documentos
+    for (int i = 0; i < size; i++) 
+    {
+        DocumentRelevance *doc_rel = (DocumentRelevance *)vector_get(documents, i);
+        doc_rel_destroy(doc_rel);
     }
 
     vector_destroy(documents);

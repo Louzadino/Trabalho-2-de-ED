@@ -32,6 +32,11 @@ int doc_freq_get_frequency(DocumentFrequency *df)
     return df->frequency;
 }
 
+void doc_freq_set_frequency(DocumentFrequency *df, int frequency)
+{
+    df->frequency = frequency;
+}
+
 void doc_freq_increment(DocumentFrequency *df)
 {
     df->frequency++;

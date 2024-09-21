@@ -332,7 +332,7 @@ void *binary_tree_get(BinaryTree *bt, void *key)
     while (current)
     {
         if (bt->cmp_fn(key, current->key) == 0) // Se a chave for igual à chave do nó atual
-            return current;
+            return current->value;
         else if (bt->cmp_fn(key, current->key) < 0) // Se a chave for menor que a chave do nó atual
             current = current->left;
         else // Se a chave for maior que a chave do nó atual

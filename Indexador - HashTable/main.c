@@ -4,7 +4,6 @@
 #include "hash.h"
 #include "list.h"
 #include "document_frequency.h"
-#include "document.h"
 #include "vector.h"
 #include "WordIndexer.h"
 
@@ -40,10 +39,6 @@ int cmp_string(const void *a, const void *b)
 {
     return cmp_str(((HashTableItem *)a)->key, ((HashTableItem *)b)->key);
 }
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define MAX_DOC_NAME 100
 

@@ -40,7 +40,6 @@ void word_indexer_add_word(WordIndexer *indexer, char *word, char* doc_name)
 
         if (!(strcmp(current_doc_name, doc_name))) {
             doc_freq_increment(current_df);
-            //free(word); // Libera a palavra se ela já existe
             return; // Saí da função se a frequência foi incrementada
         }
         n = n->next;
@@ -106,6 +105,7 @@ HashTable* word_indexer_get_table(WordIndexer *indexer)
 
 void word_indexer_destroy(WordIndexer *indexer) 
 {
+    // Cria iterador para percorrer a tabela hash
     HashTableIterator *it = hash_table_iterator(indexer->table);
     
     while (!hash_table_iterator_is_over(it)) {
@@ -117,15 +117,15 @@ void word_indexer_destroy(WordIndexer *indexer)
         Node *n = list_get_head(doc_list);
         while (n != NULL) {
             DocumentFrequency *df = (DocumentFrequency *)n->value;
-            doc_freq_destroy(df); // Certifique-se de que isso está correto
+            doc_freq_destroy(df);
             n = n->next;
         }
-        list_destroy(doc_list); // Libere a lista
-        free(word); // Libere a palavra
-        free(item); // Libere o item
+        list_destroy(doc_list); // Libera a lista
+        free(word); // Libera a palavra
+        free(item); // Libera o item
     }
     
     hash_table_iterator_destroy(it);
-    hash_table_destroy(indexer->table); // Libere a tabela hash
-    free(indexer); // Libere o indexador
+    hash_table_destroy(indexer->table); // Libera a tabela hash
+    free(indexer); // Libera o indexador
 }

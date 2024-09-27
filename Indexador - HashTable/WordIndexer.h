@@ -5,7 +5,6 @@
 #include "hash.h"
 #include "list.h"
 #include "document_frequency.h"
-#include "document.h"
 
 typedef struct WordIndexer WordIndexer;
 

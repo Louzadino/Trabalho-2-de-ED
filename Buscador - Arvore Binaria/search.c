@@ -98,6 +98,18 @@ void process_query(BinaryTree *index_tree, Vector *stopwords,
     // Cria uma arvore binaria para armazenar a relevância de cada documento
     BinaryTree *doc_relevances = binary_tree_construct(cmp_fn, key_destroy_fn, val_destroy_fn);
 
+    // Processa a consulta
+    consult_processer(index_tree, query_words, doc_relevances);
+    
+    // Exibe os documentos mais relevantes
+    display_top_documents(doc_relevances);
+
+    // Destroi a consulta
+    consult_destroy(doc_relevances, query_words);
+}
+
+void consult_processer(BinaryTree *index_tree, Vector *query_words, BinaryTree *doc_relevances)
+{
     // Para cada palavra da consulta
     for (int i = 0; i < vector_size(query_words); i++) 
     {
@@ -135,10 +147,10 @@ void process_query(BinaryTree *index_tree, Vector *stopwords,
             }
         }
     }
-    
-    // Exibe os documentos mais relevantes
-    display_top_documents(doc_relevances);
+}
 
+void consult_destroy(BinaryTree *doc_relevances, Vector* query_words)
+{
     // Destruição do vetor de palavras da consulta
     int query_words_size = vector_size(query_words);
     for (int i = 0; i < query_words_size; i++) 

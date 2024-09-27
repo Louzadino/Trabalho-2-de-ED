@@ -21,6 +21,10 @@ void process_query(BinaryTree *index_tree, Vector *stopwords,
                     ValDestroyFn val_destroy_fn,
                     int (*cmp)(const void*, const void*));
 
+void consult_processer(BinaryTree *index_tree, Vector *query_words, BinaryTree *doc_relevances);
+
+void consult_destroy(BinaryTree *doc_relevances, Vector* query_words);
+
 void display_top_documents(BinaryTree *doc_relevances);
 
 #endif

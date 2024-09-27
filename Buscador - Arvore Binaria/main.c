@@ -45,6 +45,30 @@ int cmp_string(const void *a, const void *b)
     return cmp_str((char *)a, (char *)b);
 }
 
+void index_tree_destroy(BinaryTree* index_tree)
+{
+    Vector *v = binary_tree_inorder_traversal(index_tree);
+
+    for (int i = 0; i < vector_size(v); i++)
+    {
+        KeyValPair *kvp = (KeyValPair *)vector_get(v, i);
+        List *doc_list = (List *)kvp->value;
+
+        // Destrói a lista de DocumentFrequency
+        Node *n = list_get_head(doc_list);
+        while (n != NULL)
+        {
+            DocumentFrequency *df = (DocumentFrequency *)n->value;
+            doc_freq_destroy(df);
+            n = n->next;
+        }
+        list_destroy(doc_list);
+        key_val_pair_destroy(kvp);
+    }
+    vector_destroy(v);
+    binary_tree_destroy(index_tree);
+}
+
 int main()
 {
 
@@ -67,29 +91,9 @@ int main()
     process_query(index_tree, stopwords, cmp_fn, key_destroy_fn, val_destroy_fn, cmp_string);
 
     // Destruição da arvore binaria de indices
-    Vector *v = binary_tree_inorder_traversal(index_tree);
-
-    for (int i = 0; i < vector_size(v); i++)
-    {
-        KeyValPair *kvp = (KeyValPair *)vector_get(v, i);
-        List *doc_list = (List *)kvp->value;
-
-        // Destrói a lista de DocumentFrequency
-        Node *n = list_get_head(doc_list);
-        while (n != NULL)
-        {
-            DocumentFrequency *df = (DocumentFrequency *)n->value;
-            doc_freq_destroy(df); // Certifique-se de que isso está correto
-            n = n->next;
-        }
-        list_destroy(doc_list);
-        key_val_pair_destroy(kvp);
-    }
-    vector_destroy(v);
-    binary_tree_destroy(index_tree);
+    index_tree_destroy(index_tree);
 
     // Destruição das stopwords
-
     int size = vector_size(stopwords);
     for (int i = 0; i < size; i++)
         free(vector_get(stopwords, i));

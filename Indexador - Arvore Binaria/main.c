@@ -41,8 +41,7 @@ int main()
     scanf("%s", dir);
     FILE *file = fopen(dir, "r");
 
-    if (file == NULL) 
-        exit(printf("ERRO: nao foi possivel abrir o arquivo\n"));
+    if (file == NULL) exit(printf("ERRO: nao foi possivel abrir o arquivo\n"));
 
     // Lê o número de documentos
     int qtd_docs;

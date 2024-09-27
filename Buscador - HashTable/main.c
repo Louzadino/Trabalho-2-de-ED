@@ -50,7 +50,6 @@ int main()
     process_query(index_table, stopwords, cmp_string, hash_str, cmp_str);
 
     // Destruição da tabela hash de indices
-
     HashTableIterator *it = hash_table_iterator(index_table);
 
     while (!hash_table_iterator_is_over(it))

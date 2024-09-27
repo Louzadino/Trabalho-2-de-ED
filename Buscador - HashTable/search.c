@@ -96,6 +96,25 @@ void process_query(HashTable *index_table, Vector *stopwords, int (*cmp)(const v
     // Cria uma tabela hash para armazenar a relevância de cada documento
     HashTable *doc_relevances = hash_table_construct(2011, hash_str, cmp_str);
 
+    // Processa a consulta
+    relevance_table_processer(doc_relevances, query_words, index_table);
+
+    // Ordena e exibe os documentos mais relevantes
+    display_top_documents(doc_relevances);
+
+    // Destruição do vetor de palavras da consulta
+    int query_words_size = vector_size(query_words);
+    for (int i = 0; i < query_words_size; i++) 
+        free(vector_get(query_words, i));
+
+    vector_destroy(query_words);
+
+    // Destruição da tabela de relevância
+    relevance_table_destroy(doc_relevances);
+}
+
+void relevance_table_processer(HashTable* doc_relevances, Vector* query_words, HashTable* index_table)
+{
     // Para cada palavra da consulta
     for (int i = 0; i < vector_size(query_words); i++) 
     {
@@ -131,18 +150,10 @@ void process_query(HashTable *index_table, Vector *stopwords, int (*cmp)(const v
             }
         }
     }
+}
 
-    // Ordena e exibe os documentos mais relevantes
-    display_top_documents(doc_relevances);
-
-    // Destruição do vetor de palavras da consulta
-    int query_words_size = vector_size(query_words);
-    for (int i = 0; i < query_words_size; i++) 
-        free(vector_get(query_words, i));
-
-    vector_destroy(query_words);
-
-    // Destruição da tabela de relevância
+void relevance_table_destroy(HashTable *doc_relevances) 
+{
     HashTableIterator *it = hash_table_iterator(doc_relevances);
     while (!hash_table_iterator_is_over(it)) 
     {
@@ -155,7 +166,6 @@ void process_query(HashTable *index_table, Vector *stopwords, int (*cmp)(const v
     hash_table_iterator_destroy(it);
     hash_table_destroy(doc_relevances);
 }
-
 
 void display_top_documents(HashTable *doc_relevances) 
 {

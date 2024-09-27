@@ -21,6 +21,10 @@ void process_query(HashTable *index_table, Vector *stopwords,
                     int (*hash_str)(HashTable*, void*), 
                     int (*cmp_str)(void*, void*));
 
+void relevance_table_processer(HashTable* doc_relevances, Vector* query_words, HashTable* index_table);
+
+void relevance_table_destroy(HashTable *doc_relevances);
+
 void display_top_documents(HashTable *doc_relevances);
 
 #endif
